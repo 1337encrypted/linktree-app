@@ -96,7 +96,7 @@ export function CustomIconsProvider({ children }: { children: ReactNode }) {
 
           setCustomIcons(prev => [...prev, newIcon])
           resolve(newIcon)
-        } catch (error) {
+        } catch {
           reject(new Error('Failed to process SVG file'))
         }
       }

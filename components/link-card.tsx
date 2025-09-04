@@ -1,6 +1,6 @@
 "use client"
 
-import type { Link } from "@/lib/links"
+import type { Link } from "@/lib/types"
 import { Card } from "@/components/ui/card"
 import { IconDisplay } from "./icon-display"
 import { Edit2, Trash2 } from "lucide-react"

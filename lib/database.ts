@@ -64,11 +64,11 @@ export class LinksDatabase {
   }
 
   // Convert database result to proper Link format
-  private formatLink(dbLink: any): Link {
+  private formatLink(dbLink: Record<string, unknown>): Link {
     return {
       ...dbLink,
       isActive: Boolean(dbLink.isActive)
-    }
+    } as Link
   }
 
   // Get all links
@@ -78,7 +78,7 @@ export class LinksDatabase {
       ORDER BY category, "order", createdAt
     `)
     const results = stmt.all()
-    return results.map(link => this.formatLink(link))
+    return results.map(link => this.formatLink(link as Record<string, unknown>))
   }
 
   // Get links by category
@@ -89,7 +89,7 @@ export class LinksDatabase {
       ORDER BY "order", createdAt
     `)
     const results = stmt.all(category)
-    return results.map(link => this.formatLink(link))
+    return results.map(link => this.formatLink(link as Record<string, unknown>))
   }
 
   // Get active links
@@ -100,7 +100,7 @@ export class LinksDatabase {
       ORDER BY category, "order", createdAt
     `)
     const results = stmt.all()
-    return results.map(link => this.formatLink(link))
+    return results.map(link => this.formatLink(link as Record<string, unknown>))
   }
 
   // Add new link

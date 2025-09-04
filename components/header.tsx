@@ -39,9 +39,7 @@ export default function Header() {
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    console.log('Logo clicked, authenticated:', isAuthenticated)
     if (isAuthenticated) {
-      console.log('Triggering file input click')
       fileInputRef.current?.click()
     } else {
       setShowThemeDropdown(!showThemeDropdown)
@@ -72,7 +70,6 @@ export default function Header() {
               className="hidden"
               disabled={!isAuthenticated}
               onClick={(e) => {
-                console.log('File input clicked')
                 e.stopPropagation()
               }}
             />
@@ -184,6 +181,7 @@ export default function Header() {
       </header>
 
       {showLoginForm && <LoginForm onClose={() => setShowLoginForm(false)} />}
+      {showPasswordForm && <PasswordChangeForm onClose={() => setShowPasswordForm(false)} />}
     </>
   )
 }

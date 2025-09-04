@@ -4,11 +4,11 @@ import { linksDB } from '@/lib/database'
 // PUT - Update link
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json()
-    const { id } = params
+    const { id } = await params
 
     const success = linksDB.updateLink(id, body)
 
@@ -32,10 +32,10 @@ export async function PUT(
 // DELETE - Delete link
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const success = linksDB.deleteLink(id)
 

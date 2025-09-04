@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useRef, useEffect } from "react"
 import { useBackgroundTheme } from "@/lib/background-themes"
 import { Palette } from "lucide-react"
 

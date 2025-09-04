@@ -227,7 +227,7 @@ export function IconSelector({ selectedIcon, onIconSelect, onClose }: IconSelect
               <Upload className="w-12 h-12 text-white/40 mb-4" />
               <p className="text-white/60 text-sm text-center">
                 No custom icons yet.<br />
-                Click "Upload SVG" to add your own icons!
+                Click &ldquo;Upload SVG&rdquo; to add your own icons!
               </p>
             </div>
           ) : (

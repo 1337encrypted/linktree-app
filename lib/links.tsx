@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Link, LinkFormData, ApiResponse } from "./types"
+import type { Link, LinkFormData } from "./types"
 
 interface LinksContextType {
   links: Link[]
