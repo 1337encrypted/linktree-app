@@ -1,101 +1,266 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import type React from "react"
+
+import { useState } from "react"
+import Header from "@/components/header"
+import ShaderBackground from "@/components/shader-background"
+import { useLinks, type Link } from "@/lib/links"
+import { useAuth } from "@/lib/auth"
+import LinkCard from "@/components/link-card"
+import DraggableLinkCard from "@/components/draggable-link-card" // Fixed import to use default import syntax instead of named import
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { IconSelector } from "@/components/ui/icon-selector"
+import { Plus, Search } from "lucide-react"
+
+export default function LinktreePage() {
+  const { isAuthenticated } = useAuth()
+  const { getLinksByCategory, addLink, updateLink, deleteLink, reorderLinks } = useLinks()
+  const links = getLinksByCategory("link")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [draggedLink, setDraggedLink] = useState<string | null>(null) // Added drag state management for proper drag and drop functionality
+  const [editingLink, setEditingLink] = useState<Link | null>(null)
+  const [showIconSelector, setShowIconSelector] = useState(false)
+  const [newLink, setNewLink] = useState({
+    title: "",
+    url: "",
+    description: "",
+    icon: "🔗",
+  })
+
+  const filteredLinks = links.filter(
+    (link) =>
+      link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      link.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  const handleDragStart = (e: React.DragEvent, link: Link) => {
+    setDraggedLink(link.id)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }
+
+  const handleDrop = (e: React.DragEvent, targetLink: Link) => {
+    e.preventDefault()
+    if (draggedLink && draggedLink !== targetLink.id) {
+      const draggedIndex = links.findIndex((l) => l.id === draggedLink)
+      const targetIndex = links.findIndex((l) => l.id === targetLink.id)
+
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        reorderLinks(draggedIndex, targetIndex)
+      }
+    }
+    setDraggedLink(null)
+  }
+
+  const handleEdit = (link: Link) => {
+    setEditingLink(link)
+    setNewLink({
+      title: link.title,
+      url: link.url,
+      description: link.description || "",
+      icon: link.icon || "🔗",
+    })
+    setShowAddForm(true)
+  }
+
+  const handleAddLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newLink.title && newLink.url) {
+      if (editingLink) {
+        await updateLink(editingLink.id, newLink)
+        setEditingLink(null)
+      } else {
+        await addLink({ ...newLink, category: "link", isActive: true })
+      }
+      setNewLink({ title: "", url: "", description: "", icon: "🔗" })
+      setShowAddForm(false)
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <ShaderBackground>
+      <Header />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div className="relative z-10 pt-20 px-6 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Search and Add Section */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="flex gap-4 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search links..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
+              {isAuthenticated && (
+                <Button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-md border-white/20 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Link
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {isAuthenticated && showAddForm && (
+            <div className="max-w-md mx-auto mb-8 p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+              <form onSubmit={handleAddLink} className="space-y-4">
+                <div>
+                  <Label htmlFor="title" className="text-white">
+                    Link Title
+                  </Label>
+                  <Input
+                    id="title"
+                    value={newLink.title}
+                    onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    placeholder="Enter link title"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="url" className="text-white">
+                    Link URL
+                  </Label>
+                  <Input
+                    id="url"
+                    type="url"
+                    value={newLink.url}
+                    onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    placeholder="https://..."
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description" className="text-white">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    value={newLink.description}
+                    onChange={(e) => setNewLink({ ...newLink, description: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    placeholder="Link description"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">
+                    Icon
+                  </Label>
+                  <Button
+                    type="button"
+                    onClick={() => setShowIconSelector(true)}
+                    variant="outline"
+                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start overflow-hidden"
+                  >
+                    <div className="flex items-center min-w-0 flex-1">
+                      <div className="text-2xl mr-3 flex-shrink-0">
+                        {newLink.icon.startsWith('data:') || newLink.icon.startsWith('http') ? (
+                          <img 
+                            src={newLink.icon} 
+                            alt="Icon" 
+                            className="w-6 h-6 object-contain"
+                            style={{ filter: 'brightness(0) invert(1)' }}
+                          />
+                        ) : (
+                          newLink.icon
+                        )}
+                      </div>
+                      <span className="truncate text-left">Choose Icon</span>
+                    </div>
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit" className={`flex-1 ${editingLink ? 'bg-black/20 hover:bg-black/30 text-white backdrop-blur-sm border border-white/20' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                    {editingLink ? "Update Link" : "Add Link"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowAddForm(false)
+                      setEditingLink(null) // Reset editing state when canceling
+                    }}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Links Grid */}
+          {filteredLinks.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-12">
+              {filteredLinks.map((link) =>
+                isAuthenticated ? (
+                  <DraggableLinkCard
+                    key={link.id}
+                    link={link}
+                    onEdit={handleEdit}
+                    onDelete={deleteLink}
+                    onDragStart={(e) => handleDragStart(e, link)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, link)}
+                    isDragging={draggedLink === link.id}
+                  />
+                ) : (
+                  <LinkCard key={link.id} link={link} />
+                ),
+              )}
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-white/10 backdrop-blur-md border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl">🔗</span>
+              </div>
+              <h2 className="text-2xl font-semibold text-white mb-4">
+                {searchQuery ? "No matching links found" : "No Links Available"}
+              </h2>
+              <p className="text-white/70 mb-6">
+                {searchQuery
+                  ? "Try adjusting your search terms."
+                  : "The admin hasn't added any links yet. Check back later!"}
+              </p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="text-center py-8 border-t border-white/10">
+            <p className="text-white/50 text-sm">Built by Yash Herekar 2025 • Built with Next.js</p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+
+      {/* Icon Selector Modal */}
+      {showIconSelector && (
+        <IconSelector
+          selectedIcon={newLink.icon}
+          onIconSelect={(icon) => {
+            setNewLink({ ...newLink, icon })
+            setShowIconSelector(false)
+          }}
+          onClose={() => setShowIconSelector(false)}
+        />
+      )}
+    </ShaderBackground>
+  )
 }
