@@ -190,7 +190,7 @@ export default function ProjectsPage() {
                 </Button>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" className={`flex-1 ${editingProject ? 'bg-black/20 hover:bg-black/30 text-white backdrop-blur-sm border border-white/20' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                <Button type="submit" className="flex-1 bg-black/20 hover:bg-black/30 text-white backdrop-blur-sm border border-white/20">
                   {editingProject ? "Update Project" : "Add Project"}
                 </Button>
                 <Button
