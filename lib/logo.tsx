@@ -27,9 +27,10 @@ export function LogoProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const setLogo = (url: string | null) => {
-    setLogoUrl(url)
-    if (url) {
-      localStorage.setItem("linktree-logo", url)
+    const finalUrl = url || "/assets/images/gridflow.png"
+    setLogoUrl(finalUrl)
+    if (finalUrl && finalUrl !== "/assets/images/gridflow.png") {
+      localStorage.setItem("linktree-logo", finalUrl)
     } else {
       localStorage.removeItem("linktree-logo")
     }

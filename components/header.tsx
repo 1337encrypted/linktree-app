@@ -50,7 +50,7 @@ export default function Header() {
   const handleRemoveLogo = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setLogo(null)
+    setLogo("/assets/images/gridflow.png")
   }
 
   return (
@@ -75,44 +75,29 @@ export default function Header() {
               }}
             />
             <div className="flex items-center">
-              {logoUrl ? (
-                <div className="relative">
-                  <Image
-                    src={logoUrl}
-                    alt="Logo"
-                    width={120}
-                    height={40}
-                    className="h-10 w-auto max-w-[120px] object-contain"
-                  />
-                  {isAuthenticated && (
-                    <button
-                      onClick={handleRemoveLogo}
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
-                      title="Remove logo"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="relative">
-                  <svg
-                    fill="currentColor"
-                    viewBox="0 0 147 70"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    className="size-10 translate-x-[-0.5px] text-white group-hover:text-white/80 transition-colors"
+              <div className="relative">
+                <Image
+                  src={logoUrl || "/assets/images/gridflow.png"}
+                  alt="Logo"
+                  width={120}
+                  height={40}
+                  className="h-10 w-auto max-w-[120px] object-contain"
+                />
+                {isAuthenticated && logoUrl && logoUrl !== "/assets/images/gridflow.png" && (
+                  <button
+                    onClick={handleRemoveLogo}
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
+                    title="Remove logo"
                   >
-                    <path d="M56 50.2031V14H70V60.1562C70 65.5928 65.5928 70 60.1562 70C57.5605 70 54.9982 68.9992 53.1562 67.1573L0 14H19.7969L56 50.2031Z"></path>
-                    <path d="M147 56H133V23.9531L100.953 56H133V70H96.6875C85.8144 70 77 61.1856 77 50.3125V14H91V46.1562L123.156 14H91V0H127.312C138.186 0 147 8.81439 147 19.6875V56Z"></path>
-                  </svg>
-                  {isAuthenticated && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                      <Upload className="w-2 h-2" />
-                    </div>
-                  )}
-                </div>
-              )}
+                    ×
+                  </button>
+                )}
+                {isAuthenticated && (!logoUrl || logoUrl === "/assets/images/gridflow.png") && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <Upload className="w-2 h-2" />
+                  </div>
+                )}
+              </div>
             </div>
             {isUploading && (
               <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
