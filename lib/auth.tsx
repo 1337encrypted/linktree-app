@@ -4,56 +4,94 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 
 interface AuthContextType {
   isAuthenticated: boolean
-  login: (password: string) => boolean
-  logout: () => void
-  changePassword: (currentPassword: string, newPassword: string) => boolean
+  login: (password: string) => Promise<boolean>
+  logout: () => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Default password for localhost - can be changed via changePassword
-const DEFAULT_PASSWORD = "admin123"
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is already logged in (localStorage for localhost)
-    const authStatus = localStorage.getItem("linktree-auth")
-    if (authStatus === "true") {
-      setIsAuthenticated(true)
-    }
+    // Check authentication status on mount
+    checkAuthStatus()
   }, [])
 
-  const getCurrentPassword = (): string => {
-    return localStorage.getItem("linktree-password") || DEFAULT_PASSWORD
-  }
-
-  const login = (password: string): boolean => {
-    const currentPassword = getCurrentPassword()
-    if (password === currentPassword) {
-      setIsAuthenticated(true)
-      localStorage.setItem("linktree-auth", "true")
-      return true
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/verify', {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      setIsAuthenticated(data.authenticated || false)
+    } catch (error) {
+      console.error('Error checking auth status:', error)
+      setIsAuthenticated(false)
+    } finally {
+      setLoading(false)
     }
-    return false
   }
 
-  const logout = () => {
-    setIsAuthenticated(false)
-    localStorage.removeItem("linktree-auth")
-  }
+  const login = async (password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+        credentials: 'include'
+      })
 
-  const changePassword = (currentPassword: string, newPassword: string): boolean => {
-    const storedPassword = getCurrentPassword()
-    if (currentPassword === storedPassword) {
-      localStorage.setItem("linktree-password", newPassword)
-      return true
+      const data = await response.json()
+      if (data.success) {
+        setIsAuthenticated(true)
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
     }
-    return false
   }
 
-  return <AuthContext.Provider value={{ isAuthenticated, login, logout, changePassword }}>{children}</AuthContext.Provider>
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      setIsAuthenticated(false)
+    } catch (error) {
+      console.error('Logout error:', error)
+      setIsAuthenticated(false)
+    }
+  }
+
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+        credentials: 'include'
+      })
+
+      const data = await response.json()
+      return data.success || false
+    } catch (error) {
+      console.error('Change password error:', error)
+      return false
+    }
+  }
+
+  return <AuthContext.Provider value={{ isAuthenticated, login, logout, changePassword, loading }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

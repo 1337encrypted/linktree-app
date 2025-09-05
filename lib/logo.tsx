@@ -12,14 +12,16 @@ interface LogoContextType {
 const LogoContext = createContext<LogoContextType | undefined>(undefined)
 
 export function LogoProvider({ children }: { children: ReactNode }) {
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>("/assets/images/gridflow.png")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Load logo from localStorage
+    // Load logo from localStorage, fallback to default GridFlow logo
     const savedLogo = localStorage.getItem("linktree-logo")
     if (savedLogo) {
       setLogoUrl(savedLogo)
+    } else {
+      setLogoUrl("/assets/images/gridflow.png")
     }
     setIsLoading(false)
   }, [])

@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth"
 import { useLinks } from "@/lib/links"
 import type { Link } from "@/lib/types"
 import Header from "@/components/header"
-import { LinkCard } from "@/components/link-card"
+import { LinkCard, LinkCardSkeleton } from "@/components/link-card"
 import DraggableLinkCard from "@/components/draggable-link-card"
 import { EmptyState } from "@/components/empty-state"
 import { ShaderBackground } from "@/components/shader-background"
@@ -19,8 +19,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { IconSelector } from "@/components/ui/icon-selector"
 
 export default function ProjectsPage() {
-  const { isAuthenticated } = useAuth()
-  const { links, addLink, updateLink, deleteLink, reorderLinks } = useLinks()
+  const { isAuthenticated, loading } = useAuth()
+  const { links, addLink, updateLink, deleteLink, reorderLinks, isLoading: linksLoading } = useLinks()
   const [searchTerm, setSearchTerm] = useState("")
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingProject, setEditingProject] = useState<Link | null>(null)
@@ -87,6 +87,17 @@ export default function ProjectsPage() {
       }
     }
     setDraggedProject(null)
+  }
+
+  // Show loading state while authentication is being verified
+  if (loading) {
+    return (
+      <ShaderBackground>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white text-lg">Loading...</div>
+        </div>
+      </ShaderBackground>
+    )
   }
 
   return (
@@ -210,7 +221,14 @@ export default function ProjectsPage() {
         )}
 
         {/* Projects Grid */}
-        {filteredProjects.length > 0 ? (
+        {linksLoading ? (
+          /* Skeleton Loading State */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-12">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <LinkCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-12">
             {filteredProjects.map((project) =>
               isAuthenticated ? (

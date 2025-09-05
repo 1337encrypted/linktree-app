@@ -14,35 +14,46 @@ export default function PasswordChangeForm({ onClose }: PasswordChangeFormProps)
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
   const { changePassword } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError("All fields are required")
+      setLoading(false)
       return
     }
 
     if (newPassword !== confirmPassword) {
       setError("New passwords do not match")
+      setLoading(false)
       return
     }
 
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters")
+      setLoading(false)
       return
     }
 
-    const success = changePassword(currentPassword, newPassword)
-    if (success) {
-      setSuccess(true)
-      setTimeout(() => {
-        onClose()
-      }, 1500)
-    } else {
-      setError("Current password is incorrect")
+    try {
+      const success = await changePassword(currentPassword, newPassword)
+      if (success) {
+        setSuccess(true)
+        setTimeout(() => {
+          onClose()
+        }, 1500)
+      } else {
+        setError("Current password is incorrect")
+      }
+    } catch (error) {
+      setError("Failed to change password. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -129,9 +140,10 @@ export default function PasswordChangeForm({ onClose }: PasswordChangeFormProps)
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-3 rounded-lg bg-white text-black hover:bg-white/90 font-medium transition-all duration-200"
+                className="flex-1 px-4 py-3 rounded-lg bg-white text-black hover:bg-white/90 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
               >
-                Change Password
+                {loading ? "Changing..." : "Change Password"}
               </button>
             </div>
           </form>

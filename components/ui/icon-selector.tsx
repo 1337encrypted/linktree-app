@@ -165,7 +165,7 @@ export function IconSelector({ selectedIcon, onIconSelect, onClose }: IconSelect
                 <Button
                   type="submit"
                   size="sm"
-                  className="bg-black hover:bg-gray-800 text-white border border-white/20"
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20"
                 >
                   Add Icon
                 </Button>

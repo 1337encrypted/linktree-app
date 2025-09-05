@@ -4,6 +4,7 @@ import type { Link } from "@/lib/types"
 import { Card } from "@/components/ui/card"
 import { IconDisplay } from "./icon-display"
 import { Edit2, Trash2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface LinkCardProps {
   link: Link
@@ -72,5 +73,33 @@ const LinkCard = ({ link, isEditable = false, onEdit, onDelete }: LinkCardProps)
   )
 }
 
-export { LinkCard }
+const LinkCardSkeleton = () => {
+  return (
+    <Card
+      className="
+        relative p-4 bg-white/10 backdrop-blur-md border-white/20 
+        aspect-square flex flex-col items-center justify-center text-center
+      "
+    >
+      {/* Icon skeleton */}
+      <div className="mb-2">
+        <Skeleton className="w-8 h-8 rounded-full" />
+      </div>
+
+      {/* Title skeleton */}
+      <div className="mb-1 w-full">
+        <Skeleton className="h-4 w-3/4 mx-auto mb-1" />
+        <Skeleton className="h-4 w-1/2 mx-auto" />
+      </div>
+
+      {/* Description skeleton */}
+      <div className="w-full">
+        <Skeleton className="h-3 w-4/5 mx-auto mb-1" />
+        <Skeleton className="h-3 w-2/3 mx-auto" />
+      </div>
+    </Card>
+  )
+}
+
+export { LinkCard, LinkCardSkeleton }
 export default LinkCard

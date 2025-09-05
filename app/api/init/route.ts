@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server'
-import { linksDB } from '@/lib/database'
+import { linksDB, adminAuthDB } from '@/lib/database'
 
 // POST - Initialize database with seed data
 export async function POST() {
   try {
+    // Initialize admin authentication
+    adminAuthDB.initializeAdmin()
+    
     // Seed initial data
     linksDB.seedInitialData()
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Database initialized successfully' 
+      message: 'Database initialized successfully with admin authentication' 
     })
   } catch (error) {
     console.error('Error initializing database:', error)

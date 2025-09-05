@@ -1,8 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Figtree } from "next/font/google"
-import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth"
 import { LinksProvider } from "@/lib/links"
@@ -25,10 +25,22 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 })
 
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  display: "swap",
+})
+
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  display: "swap",
+})
+
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Linktree",
+  description: "Your personal link hub",
+  generator: "Next.js",
 }
 
 export default function RootLayout({
@@ -43,12 +55,13 @@ export default function RootLayout({
 html {
   font-family: ${figtree.style.fontFamily};
   --font-sans: ${figtree.variable};
-  --font-mono: ${GeistMono.variable};
+  --font-mono: ${geistMono.variable};
   --font-instrument-serif: ${instrumentSerif.variable};
+  --font-geist-sans: ${geistSans.variable};
 }
         `}</style>
       </head>
-      <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
+      <body className={`${figtree.variable} ${instrumentSerif.variable} ${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>
           <LinksProvider>
             <LogoProvider>

@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
+import crypto from 'crypto'
 import type { Link, LinkInsertData, LinkUpdateData } from './types'
 
 let db: Database.Database | null = null
@@ -37,11 +38,24 @@ export function initDatabase() {
     )
   `)
 
+  // Create admin authentication table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS admin_auth (
+      id INTEGER PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE DEFAULT 'admin',
+      password_hash TEXT NOT NULL,
+      salt TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
   // Create indexes for better performance
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_links_category ON links(category);
     CREATE INDEX IF NOT EXISTS idx_links_active ON links(isActive);
     CREATE INDEX IF NOT EXISTS idx_links_order ON links("order");
+    CREATE INDEX IF NOT EXISTS idx_admin_username ON admin_auth(username);
   `)
 
   return db
@@ -234,5 +248,75 @@ export class LinksDatabase {
   }
 }
 
-// Export singleton instance
+// Hash password with salt
+function hashPassword(password: string, salt?: string): { hash: string, salt: string } {
+  const saltToUse = salt || crypto.randomBytes(32).toString('hex')
+  const hash = crypto.pbkdf2Sync(password, saltToUse, 10000, 64, 'sha512').toString('hex')
+  return { hash, salt: saltToUse }
+}
+
+// Verify password against hash
+function verifyPassword(password: string, hash: string, salt: string): boolean {
+  const { hash: newHash } = hashPassword(password, salt)
+  return newHash === hash
+}
+
+// Admin Authentication Database operations
+export class AdminAuthDatabase {
+  private db: Database.Database
+
+  constructor() {
+    this.db = getDatabase()
+  }
+
+  // Initialize admin with default password
+  initializeAdmin(): void {
+    const existingAdmin = this.getAdmin()
+    if (!existingAdmin) {
+      const { hash, salt } = hashPassword('admin123') // Default password
+      const stmt = this.db.prepare(`
+        INSERT INTO admin_auth (username, password_hash, salt)
+        VALUES (?, ?, ?)
+      `)
+      stmt.run('admin', hash, salt)
+    }
+  }
+
+  // Get admin record
+  getAdmin(): { id: number, username: string, password_hash: string, salt: string } | undefined {
+    const stmt = this.db.prepare('SELECT * FROM admin_auth WHERE username = ?')
+    return stmt.get('admin') as any
+  }
+
+  // Verify admin login
+  verifyLogin(password: string): boolean {
+    const admin = this.getAdmin()
+    if (!admin) return false
+    return verifyPassword(password, admin.password_hash, admin.salt)
+  }
+
+  // Change admin password
+  changePassword(currentPassword: string, newPassword: string): boolean {
+    const admin = this.getAdmin()
+    if (!admin) return false
+
+    // Verify current password
+    if (!verifyPassword(currentPassword, admin.password_hash, admin.salt)) {
+      return false
+    }
+
+    // Set new password
+    const { hash, salt } = hashPassword(newPassword)
+    const stmt = this.db.prepare(`
+      UPDATE admin_auth 
+      SET password_hash = ?, salt = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE username = 'admin'
+    `)
+    const result = stmt.run(hash, salt)
+    return result.changes > 0
+  }
+}
+
+// Export singleton instances
 export const linksDB = new LinksDatabase()
+export const adminAuthDB = new AdminAuthDatabase()

@@ -153,7 +153,7 @@ export default function Header() {
                 <Settings className="w-4 h-4" />
               </button>
               <button
-                onClick={logout}
+                onClick={() => logout()}
                 className="px-6 py-2.5 rounded-full bg-white text-black font-medium text-sm transition-all duration-300 hover:bg-white/90 cursor-pointer flex items-center"
               >
                 Logout

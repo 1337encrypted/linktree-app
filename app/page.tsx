@@ -8,7 +8,7 @@ import ShaderBackground from "@/components/shader-background"
 import { useLinks } from "@/lib/links"
 import type { Link } from "@/lib/types"
 import { useAuth } from "@/lib/auth"
-import LinkCard from "@/components/link-card"
+import LinkCard, { LinkCardSkeleton } from "@/components/link-card"
 import DraggableLinkCard from "@/components/draggable-link-card" // Fixed import to use default import syntax instead of named import
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,8 +18,8 @@ import { IconSelector } from "@/components/ui/icon-selector"
 import { Plus, Search } from "lucide-react"
 
 export default function LinktreePage() {
-  const { isAuthenticated } = useAuth()
-  const { getLinksByCategory, addLink, updateLink, deleteLink, reorderLinks } = useLinks()
+  const { isAuthenticated, loading } = useAuth()
+  const { getLinksByCategory, addLink, updateLink, deleteLink, reorderLinks, isLoading: linksLoading } = useLinks()
   const links = getLinksByCategory("link")
   const [searchQuery, setSearchQuery] = useState("")
   const [showAddForm, setShowAddForm] = useState(false)
@@ -85,6 +85,17 @@ export default function LinktreePage() {
       setNewLink({ title: "", url: "", description: "", icon: "🔗" })
       setShowAddForm(false)
     }
+  }
+
+  // Show loading state while authentication is being verified
+  if (loading) {
+    return (
+      <ShaderBackground>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white text-lg">Loading...</div>
+        </div>
+      </ShaderBackground>
+    )
   }
 
   return (
@@ -208,7 +219,14 @@ export default function LinktreePage() {
           )}
 
           {/* Links Grid */}
-          {filteredLinks.length > 0 ? (
+          {linksLoading ? (
+            /* Skeleton Loading State */
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-12">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <LinkCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : filteredLinks.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-12">
               {filteredLinks.map((link) =>
                 isAuthenticated ? (

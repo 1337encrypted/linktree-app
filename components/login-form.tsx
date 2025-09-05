@@ -15,18 +15,28 @@ interface LoginFormProps {
 export default function LoginForm({ onClose }: LoginFormProps) {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = login(password)
-    if (success) {
-      onClose()
-      setError("")
-    } else {
-      setError("Invalid password")
+    setLoading(true)
+    setError("")
+    
+    try {
+      const success = await login(password)
+      if (success) {
+        onClose()
+        setError("")
+      } else {
+        setError("Invalid password")
+      }
+    } catch (error) {
+      setError("Login failed. Please try again.")
+    } finally {
+      setPassword("")
+      setLoading(false)
     }
-    setPassword("")
   }
 
   return (
@@ -50,8 +60,8 @@ export default function LoginForm({ onClose }: LoginFormProps) {
               {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
             </div>
             <div className="flex gap-2">
-              <Button type="submit" className="flex-1 bg-white text-black hover:bg-white/90">
-                Login
+              <Button type="submit" className="flex-1 bg-white text-black hover:bg-white/90" disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
               </Button>
               <Button
                 type="button"
@@ -63,7 +73,6 @@ export default function LoginForm({ onClose }: LoginFormProps) {
               </Button>
             </div>
           </form>
-          <p className="text-xs text-white/50 mt-4">Default password: admin123</p>
         </CardContent>
       </Card>
     </div>
