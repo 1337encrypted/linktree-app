@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useRef } from "react"
+import Image from "next/image"
 import { Button } from "./button"
 import { Input } from "./input"
-import { iconPacks, type IconCategory } from "@/lib/icon-packs"
+import { iconPacks } from "@/lib/icon-packs"
 import { useCustomIcons } from "@/lib/custom-icons"
 import { Search, X, Upload, Trash2, Link as LinkIcon } from "lucide-react"
 
@@ -67,7 +68,7 @@ export function IconSelector({ selectedIcon, onIconSelect, onClose }: IconSelect
     try {
       new URL(string)
       return true
-    } catch (_) {
+    } catch {
       return false
     }
   }
@@ -251,11 +252,13 @@ export function IconSelector({ selectedIcon, onIconSelect, onClose }: IconSelect
                       title={customIcon?.name || undefined}
                     >
                       {isCustom ? (
-                        <img
+                        <Image
                           src={icon}
                           alt={customIcon?.name || 'Custom icon'}
+                          width={24}
+                          height={24}
                           className="w-6 h-6 object-contain"
-                          style={{ filter: 'brightness(0) invert(1)' }} // Make SVGs white
+                          style={{ filter: 'brightness(0) invert(1)' }}
                         />
                       ) : (
                         <span className="text-2xl">{icon}</span>

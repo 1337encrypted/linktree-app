@@ -31,7 +31,7 @@ export default function LoginForm({ onClose }: LoginFormProps) {
       } else {
         setError("Invalid password")
       }
-    } catch (error) {
+    } catch {
       setError("Login failed. Please try again.")
     } finally {
       setPassword("")

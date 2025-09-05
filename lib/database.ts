@@ -285,7 +285,7 @@ export class AdminAuthDatabase {
   // Get admin record
   getAdmin(): { id: number, username: string, password_hash: string, salt: string } | undefined {
     const stmt = this.db.prepare('SELECT * FROM admin_auth WHERE username = ?')
-    return stmt.get('admin') as any
+    return stmt.get('admin') as { id: number, username: string, password_hash: string, salt: string } | undefined
   }
 
   // Verify admin login

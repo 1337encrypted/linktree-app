@@ -50,7 +50,7 @@ export default function PasswordChangeForm({ onClose }: PasswordChangeFormProps)
       } else {
         setError("Current password is incorrect")
       }
-    } catch (error) {
+    } catch {
       setError("Failed to change password. Please try again.")
     } finally {
       setLoading(false)

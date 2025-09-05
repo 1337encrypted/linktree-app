@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useAuth } from "@/lib/auth"
 import { useLinks } from "@/lib/links"
 import type { Link } from "@/lib/types"
@@ -186,9 +187,11 @@ export default function ProjectsPage() {
                   <div className="flex items-center min-w-0 flex-1">
                     <div className="text-2xl mr-3 flex-shrink-0">
                       {newLink.icon.startsWith('data:') || newLink.icon.startsWith('http') ? (
-                        <img 
+                        <Image 
                           src={newLink.icon} 
                           alt="Icon" 
+                          width={24}
+                          height={24}
                           className="w-6 h-6 object-contain"
                           style={{ filter: 'brightness(0) invert(1)' }}
                         />

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      const decoded = verify(token, JWT_SECRET) as any
+      const decoded = verify(token, JWT_SECRET) as { username: string }
       return NextResponse.json({ 
         success: true, 
         authenticated: true,

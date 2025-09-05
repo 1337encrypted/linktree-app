@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useAuth } from "@/lib/auth"
 import { useLogo } from "@/lib/logo"
 import LoginForm from "./login-form"
@@ -76,9 +77,11 @@ export default function Header() {
             <div className="flex items-center">
               {logoUrl ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={logoUrl}
                     alt="Logo"
+                    width={120}
+                    height={40}
                     className="h-10 w-auto max-w-[120px] object-contain"
                   />
                   {isAuthenticated && (
