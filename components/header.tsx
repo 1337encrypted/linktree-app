@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useAuth } from "@/lib/auth"
+import { useAuth } from "@/lib/auth-static"
 import { useLogo } from "@/lib/logo"
 import LoginForm from "./login-form"
 import PasswordChangeForm from "./password-change-form"
